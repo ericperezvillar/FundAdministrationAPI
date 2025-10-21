@@ -1,6 +1,6 @@
 # FundAdminAPI (Clean Architecture, .NET 8)
 
-Enterprise-ready Fund Administration Web API implementing Clean Architecture, Repository Pattern, DTOs, AutoMapper, FluentValidation, JWT auth (local token), Serilog logging, Swagger, API versioning, health checks, and EF Core (SQLite) Code-First.
+Enterprise-ready Fund Administration Web API implementing Clean Architecture, Repository Pattern, DTOs, AutoMapper, FluentValidation, JWT auth (hardcoded users for simplicity), Serilog, Swagger, API versioning, health checks, and EF Core (SQLite) Code-First.
 
 ## Structure
 - **FundAdmin.Domain** — Entities & Enums (no dependencies)
