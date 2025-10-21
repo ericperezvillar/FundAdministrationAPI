@@ -15,11 +15,11 @@ dotnet build
 dotnet run --project src/FundAdmin.API/FundAdmin.API.csproj
 ```
 
-API at: `https://localhost:5001` (or `http://localhost:5000`).
+API at: `https://localhost:54513` (or `http://localhost:54514`).
 
 ## Auth (local demo)
-- Request token: `POST /api/v1/auth/token` with body `{ "username": "eric", "password": "any" }`
-- Use `Bearer <token>` for protected endpoints (POST/PUT/DELETE).
+- Request token: `POST /api/v1/auth/login` with body `{ "username": "admin", "password": "admin123" }`
+- Use `Bearer <token>` for protected endpoints (GET/POST/PUT/DELETE).
 
 ## Docs
 - Swagger: `/swagger`
