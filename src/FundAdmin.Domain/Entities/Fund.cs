@@ -5,7 +5,7 @@ namespace FundAdmin.Domain.Entities;
 public class Fund
 {
     [Key]
-    public int FundId { get; set; }
+    public Guid FundId { get; set; }
 
     [Required, MaxLength(200)]
     public string FundName { get; set; } = string.Empty;

@@ -21,14 +21,15 @@ namespace FundAdmin.API.Tests.Controllers
         [Fact]
         public async Task GetByInvestor_ReturnsOk_WithTransactions()
         {
+            var investorId = Guid.NewGuid();
             var transactions = new List<TransactionReadDto>
             {
-                new TransactionReadDto(1, 1, TransactionType.Subscription, 1500, DateTime.UtcNow)
+                new TransactionReadDto(Guid.NewGuid(), investorId, TransactionType.Subscription, 1500, DateTime.UtcNow)
             };
 
-            _mockService.Setup(s => s.GetByInvestorAsync(1)).ReturnsAsync(transactions);
+            _mockService.Setup(s => s.GetByInvestorAsync(investorId)).ReturnsAsync(transactions);
 
-            var result = await _controller.GetByInvestor(1);
+            var result = await _controller.GetByInvestor(investorId);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             Assert.Equal(transactions, ok.Value);
@@ -37,9 +38,10 @@ namespace FundAdmin.API.Tests.Controllers
         [Fact]
         public async Task GetFundTransactionSummary_ReturnsNotFound_WhenNull()
         {
-            _mockService.Setup(s => s.GetFundSummaryAsync(10)).ReturnsAsync((FundTransactionSummaryDto?)null);
+            var fundId = Guid.NewGuid();
+            _mockService.Setup(s => s.GetFundSummaryAsync(fundId)).ReturnsAsync((FundTransactionSummaryDto?)null);
 
-            var result = await _controller.GetFundTransactionSummary(10);
+            var result = await _controller.GetFundTransactionSummary(fundId);
 
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
@@ -47,11 +49,12 @@ namespace FundAdmin.API.Tests.Controllers
         [Fact]
         public async Task GetFundTransactionSummary_ReturnsOk_WhenFound()
         {
-            var summary = new FundTransactionSummaryDto(1, "Test", "USD", 500, 200, 300);
+            var fundId = Guid.NewGuid();
+            var summary = new FundTransactionSummaryDto(fundId, "Test", "USD", 500, 200, 300);
 
-            _mockService.Setup(s => s.GetFundSummaryAsync(1)).ReturnsAsync(summary);
+            _mockService.Setup(s => s.GetFundSummaryAsync(fundId)).ReturnsAsync(summary);
 
-            var result = await _controller.GetFundTransactionSummary(1);
+            var result = await _controller.GetFundTransactionSummary(fundId);
 
             var ok = Assert.IsType<OkObjectResult>(result.Result);
             Assert.Equal(summary, ok.Value);
@@ -60,8 +63,8 @@ namespace FundAdmin.API.Tests.Controllers
         [Fact]
         public async Task Create_ReturnsCreatedAtAction_WhenSuccessful()
         {
-            var createDto = new TransactionCreateDto(1, TransactionType.Subscription, 1500, DateTime.UtcNow);
-            var readDto = new TransactionReadDto(1, 1, TransactionType.Subscription, 1500, DateTime.UtcNow);
+            var createDto = new TransactionCreateDto(Guid.NewGuid(), TransactionType.Subscription, 1500, DateTime.UtcNow);
+            var readDto = new TransactionReadDto(Guid.NewGuid(), Guid.NewGuid(), TransactionType.Subscription, 1500, DateTime.UtcNow);
 
             _mockService.Setup(s => s.CreateAsync(createDto)).ReturnsAsync(readDto);
 

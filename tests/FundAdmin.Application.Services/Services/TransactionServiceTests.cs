@@ -31,8 +31,8 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task CreateAsync_ShouldThrow_WhenInvestorNotFound()
         {
-            _investorRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync((Investor?)null);
-            var dto = new TransactionCreateDto(1, TransactionType.Subscription, 500, DateTime.UtcNow);
+            _investorRepo.Setup(r => r.GetByIdAsync(Guid.NewGuid())).ReturnsAsync((Investor?)null);
+            var dto = new TransactionCreateDto(Guid.NewGuid(), TransactionType.Subscription, 500, DateTime.UtcNow);
 
             await Assert.ThrowsAsync<KeyNotFoundException>(() => _service.CreateAsync(dto));
         }
@@ -40,9 +40,9 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task GetFundSummaryAsync_ShouldReturnNull_WhenFundNotFound()
         {
-            _fundRepo.Setup(r => r.GetByIdAsync(9)).ReturnsAsync((Fund?)null);
+            _fundRepo.Setup(r => r.GetByIdAsync(Guid.NewGuid())).ReturnsAsync((Fund?)null);
 
-            var result = await _service.GetFundSummaryAsync(9);
+            var result = await _service.GetFundSummaryAsync(Guid.NewGuid());
 
             Assert.Null(result);
         }
@@ -50,13 +50,14 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task GetFundSummaryAsync_ShouldReturnDto_WhenFundExists()
         {
-            var fund = new Fund { FundId = 1, FundName = "Alpha", CurrencyCode = "USD" };
+            var fundId = Guid.NewGuid();
+            var fund = new Fund { FundId = fundId, FundName = "Alpha", CurrencyCode = "USD" };
 
-            _fundRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(fund);
-            _txRepo.Setup(r => r.GetTotalByFundAsync(1, TransactionType.Subscription)).ReturnsAsync(500);
-            _txRepo.Setup(r => r.GetTotalByFundAsync(1, TransactionType.Redemption)).ReturnsAsync(200);
+            _fundRepo.Setup(r => r.GetByIdAsync(fundId)).ReturnsAsync(fund);
+            _txRepo.Setup(r => r.GetTotalByFundAsync(fundId, TransactionType.Subscription)).ReturnsAsync(500);
+            _txRepo.Setup(r => r.GetTotalByFundAsync(fundId, TransactionType.Redemption)).ReturnsAsync(200);
 
-            var result = await _service.GetFundSummaryAsync(1);
+            var result = await _service.GetFundSummaryAsync(fundId);
 
             Assert.NotNull(result);
             Assert.Equal(300, result!.NetInvestment);

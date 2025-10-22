@@ -43,7 +43,7 @@ public class TransactionService : ITransactionService
         return result;
     }
 
-    public async Task<IEnumerable<TransactionReadDto>> GetByInvestorAsync(int investorId)
+    public async Task<IEnumerable<TransactionReadDto>> GetByInvestorAsync(Guid investorId)
     {
         _logger.LogInformation("Retrieving transaction information for InvestorId={InvestorId}", investorId);
 
@@ -51,7 +51,7 @@ public class TransactionService : ITransactionService
         return _mapper.Map<IEnumerable<TransactionReadDto>>(items);
     }
 
-    public async Task<FundTransactionSummaryDto?> GetFundSummaryAsync(int fundId)
+    public async Task<FundTransactionSummaryDto?> GetFundSummaryAsync(Guid fundId)
     {
         _logger.LogInformation("Retrieving transaction summary for FundId={FundId}", fundId);
 

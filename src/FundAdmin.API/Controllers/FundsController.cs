@@ -24,8 +24,8 @@ public class FundsController : ControllerBase
         return Ok(await _service.GetAllAsync());
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<FundReadDto>> GetById(int id)
+    [HttpGet("{id:Guid}")]
+    public async Task<ActionResult<FundReadDto>> GetById(Guid id)
     {
         var fund = await _service.GetByIdAsync(id);
         return fund is null ? NotFound() : Ok(fund);
@@ -38,15 +38,15 @@ public class FundsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.FundId }, created);
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, FundUpdateDto dto)
+    [HttpPut("{id:Guid}")]
+    public async Task<IActionResult> Update(Guid id, FundUpdateDto dto)
     {
         var result = await _service.UpdateAsync(id, dto);
         return result ? NoContent() : NotFound();
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpDelete("{id:Guid}")]
+    public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _service.DeleteAsync(id);
         return result ? NoContent() : NotFound();

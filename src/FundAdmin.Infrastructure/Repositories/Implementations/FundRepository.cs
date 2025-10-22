@@ -23,11 +23,11 @@ public class FundRepository : IFundRepository
         await _db.SaveChangesAsync();
     }
 
-    public async Task<bool> ExistsAsync(int id) => await _db.Funds.AnyAsync(x => x.FundId == id);
+    public async Task<bool> ExistsAsync(Guid id) => await _db.Funds.AnyAsync(x => x.FundId == id);
 
     public async Task<IEnumerable<Fund>> GetAllAsync() => await _db.Funds.AsNoTracking().ToListAsync();
 
-    public async Task<Fund?> GetByIdAsync(int id) => await _db.Funds.AsNoTracking().FirstOrDefaultAsync(x => x.FundId == id);
+    public async Task<Fund?> GetByIdAsync(Guid id) => await _db.Funds.AsNoTracking().FirstOrDefaultAsync(x => x.FundId == id);
 
     public async Task UpdateAsync(Fund entity)
     {

@@ -11,7 +11,7 @@ namespace FundAdmin.Application.Validators
 
             RuleFor(f => f.Email).NotEmpty().EmailAddress().WithMessage("Invalid email format.");
 
-            RuleFor(f => f.FundId).GreaterThan(0).WithMessage("A valid FundId is required."); ;
+            RuleFor(f => f.FundId).NotEmpty();
         }
     }
 }

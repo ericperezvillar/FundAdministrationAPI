@@ -18,14 +18,14 @@ public class TransactionRepository : ITransactionRepository
         return entity;
     }
 
-    public async Task<IEnumerable<Transaction>> GetByInvestorAsync(int investorId)
+    public async Task<IEnumerable<Transaction>> GetByInvestorAsync(Guid investorId)
     {
         return await _db.Transactions.AsNoTracking()
             .Where(t => t.InvestorId == investorId)
             .OrderByDescending(t => t.TransactionDate).ToListAsync();
     }
 
-    public async Task<decimal> GetTotalByFundAsync(int fundId, TransactionType transactionType)
+    public async Task<decimal> GetTotalByFundAsync(Guid fundId, TransactionType transactionType)
     {
         var q = _db.Transactions.AsNoTracking()
                     .Where(t => t.Investor!.FundId == fundId && t.Type == transactionType);

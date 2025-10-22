@@ -22,7 +22,7 @@ public class FundService : IFundService
         return _mapper.Map<FundReadDto>(entity);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         var entity = await _fundRepo.GetByIdAsync(id);
         if (entity is null) return false;
@@ -36,13 +36,13 @@ public class FundService : IFundService
         return _mapper.Map<IEnumerable<FundReadDto>>(items);
     }
 
-    public async Task<FundReadDto?> GetByIdAsync(int id)
+    public async Task<FundReadDto?> GetByIdAsync(Guid id)
     {
         var item = await _fundRepo.GetByIdAsync(id);
         return item is null ? null : _mapper.Map<FundReadDto>(item);
     }
 
-    public async Task<bool> UpdateAsync(int id, FundUpdateDto dto)
+    public async Task<bool> UpdateAsync(Guid id, FundUpdateDto dto)
     {
         var entity = await _fundRepo.GetByIdAsync(id);
         if (entity is null) return false;
