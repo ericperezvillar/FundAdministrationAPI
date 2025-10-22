@@ -13,6 +13,11 @@ public class AuthController : ControllerBase
     private readonly IAuthService _authService;
     public AuthController(IAuthService authService) => _authService = authService;
 
+    /// <summary>
+    /// Login endpoint
+    /// </summary>
+    /// <param name="dto">User and Password</param>
+    /// <returns>Token and expired date</returns>
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

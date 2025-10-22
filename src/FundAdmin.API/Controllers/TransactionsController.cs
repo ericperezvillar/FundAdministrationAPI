@@ -18,6 +18,11 @@ public class TransactionsController : ControllerBase
         _transactionService = service;
     }
 
+    /// <summary>
+    /// Create Transaction
+    /// </summary>
+    /// <param name="dto"></param>
+    /// <returns></returns>
     [HttpPost]
     public async Task<ActionResult<TransactionReadDto>> Create(TransactionCreateDto dto)
     {
@@ -25,12 +30,22 @@ public class TransactionsController : ControllerBase
         return CreatedAtAction(nameof(GetByInvestor), new { investorId = created.InvestorId }, created);
     }
 
+    /// <summary>
+    /// Get transactions per Investor
+    /// </summary>
+    /// <param name="investorId">Investor Id</param>
+    /// <returns>List of transactions</returns>
     [HttpGet("investor/{investorId:int}")]
     public async Task<ActionResult<IEnumerable<TransactionReadDto>>> GetByInvestor(int investorId)
     {
         return Ok(await _transactionService.GetByInvestorAsync(investorId));
     }
 
+    /// <summary>
+    /// Get transactions per Fund
+    /// </summary>
+    /// <param name="fundId">Fund Id</param>
+    /// <returns>List of transactions</returns>
     [HttpGet("fund/{fundId:int}/summary")]
     public async Task<ActionResult<IEnumerable<TransactionReadDto>>> GetFundTransactionSummary(int fundId)
     {

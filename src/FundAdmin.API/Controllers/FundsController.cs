@@ -19,7 +19,10 @@ public class FundsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<FundReadDto>>> GetAll() => Ok(await _service.GetAllAsync());
+    public async Task<ActionResult<IEnumerable<FundReadDto>>> GetAll()
+    {
+        return Ok(await _service.GetAllAsync());
+    }
 
     [HttpGet("{id:int}")]
     public async Task<ActionResult<FundReadDto>> GetById(int id)

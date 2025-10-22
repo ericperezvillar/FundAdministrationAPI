@@ -19,6 +19,10 @@ public class ReportingController : ControllerBase
         _reportingService = reportingService;
     }
 
+    /// <summary>
+    /// Report that summarize Funding and Investments
+    /// </summary>
+    /// <returns>Net investment per fund and the Number of investors per fund</returns>
     [HttpGet("net-investments")]
     public async Task<ActionResult<IEnumerable<FundNetInvestmentDto>>> GetNetInvestments()
     {
