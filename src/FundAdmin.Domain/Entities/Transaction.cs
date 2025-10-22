@@ -7,10 +7,10 @@ namespace FundAdmin.Domain.Entities;
 public class Transaction
 {
     [Key]
-    public int TransactionId { get; set; }
+    public Guid TransactionId { get; set; }
 
     [ForeignKey(nameof(Investor))]
-    public int InvestorId { get; set; }
+    public Guid InvestorId { get; set; }
 
     public Investor? Investor { get; set; }
 

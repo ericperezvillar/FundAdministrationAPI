@@ -23,7 +23,7 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
             var repo = new TransactionRepository(context);
             var tx = new Transaction
             {
-                InvestorId = 1,
+                InvestorId = Guid.NewGuid(),
                 Amount = 100,
                 Type = TransactionType.Subscription,
                 TransactionDate = DateTime.UtcNow
@@ -37,14 +37,15 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetByInvestorAsync_ShouldReturnTransactions()
         {
+            var investorId = Guid.NewGuid();
             using var context = CreateContext();
             context.Transactions.AddRange(
-                new Transaction { InvestorId = 1, Amount = 100, Type = TransactionType.Subscription, TransactionDate = DateTime.UtcNow },
-                new Transaction { InvestorId = 2, Amount = 200, Type = TransactionType.Subscription, TransactionDate = DateTime.UtcNow });
+                new Transaction { InvestorId = investorId, Amount = 100, Type = TransactionType.Subscription, TransactionDate = DateTime.UtcNow },
+                new Transaction { InvestorId = Guid.NewGuid(), Amount = 200, Type = TransactionType.Subscription, TransactionDate = DateTime.UtcNow });
             await context.SaveChangesAsync();
 
             var repo = new TransactionRepository(context);
-            var result = await repo.GetByInvestorAsync(1);
+            var result = await repo.GetByInvestorAsync(investorId);
 
             Assert.Single(result);
         }
@@ -52,17 +53,19 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetTotalByFundAsync_ShouldReturnSum()
         {
+            var fundId = Guid.NewGuid();
+            var investorId = Guid.NewGuid();
             using var context = CreateContext();
-            var investor = new Investor { InvestorId = 1, FundId = 5 };
+            var investor = new Investor { InvestorId = investorId, FundId = fundId };
             context.Investors.Add(investor);
             context.Transactions.AddRange(
-                new Transaction { InvestorId = 1, Investor = investor, Amount = 100, Type = TransactionType.Subscription },
-                new Transaction { InvestorId = 1, Investor = investor, Amount = 50, Type = TransactionType.Subscription }
+                new Transaction { InvestorId = investorId, Investor = investor, Amount = 100, Type = TransactionType.Subscription },
+                new Transaction { InvestorId = investorId, Investor = investor, Amount = 50, Type = TransactionType.Subscription }
             );
             await context.SaveChangesAsync();
 
             var repo = new TransactionRepository(context);
-            var total = await repo.GetTotalByFundAsync(5, TransactionType.Subscription);
+            var total = await repo.GetTotalByFundAsync(fundId, TransactionType.Subscription);
 
             Assert.Equal(150, total);
         }

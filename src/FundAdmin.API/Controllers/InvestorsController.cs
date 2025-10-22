@@ -24,8 +24,8 @@ public class InvestorsController : ControllerBase
         return Ok(await _service.GetAllAsync());
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<ActionResult<InvestorReadDto>> GetById(int id)
+    [HttpGet("{id:Guid}")]
+    public async Task<ActionResult<InvestorReadDto>> GetById(Guid id)
     {
         var investor = await _service.GetByIdAsync(id);
         return investor is null ? NotFound() : Ok(investor);
@@ -38,15 +38,15 @@ public class InvestorsController : ControllerBase
         return CreatedAtAction(nameof(GetById), new { id = created.InvestorId }, created);
     }
 
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, InvestorUpdateDto dto)
+    [HttpPut("{id:Guid}")]
+    public async Task<IActionResult> Update(Guid id, InvestorUpdateDto dto)
     {
         var result = await _service.UpdateAsync(id, dto);
         return result ? NoContent() : NotFound();
     }
 
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpDelete("{id:Guid}")]
+    public async Task<IActionResult> Delete(Guid id)
     {
         var result = await _service.DeleteAsync(id);
         return result ? NoContent() : NotFound();

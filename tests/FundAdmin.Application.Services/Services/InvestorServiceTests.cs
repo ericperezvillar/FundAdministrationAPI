@@ -30,17 +30,20 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task GetAllAsync_ShouldReturnMappedDtos()
         {
-            // Arrange
+            var investorId= Guid.NewGuid();
+            var fundId1 = Guid.NewGuid();
+            var fundId2 = Guid.NewGuid();
+
             var investors = new List<Investor>
             {
-                new() { InvestorId = 1, FullName = "Robert", Email = "robert@test.com", FundId = 1 },
-                new() { InvestorId = 2, FullName = "Bob", Email = "bob@test.com", FundId = 2 }
+                new() { InvestorId = investorId, FullName = "Robert", Email = "robert@test.com", FundId = fundId1 },
+                new() { InvestorId = investorId, FullName = "Bob", Email = "bob@test.com", FundId = fundId2 }
             };
             
             var mapped = new List<InvestorReadDto>
             {
-                new(1, "Robert", "robert@test.com", 1),
-                new(2, "Bob", "bob@test.com", 2)
+                new(investorId, "Robert", "robert@test.com", fundId1),
+                new(investorId, "Bob", "bob@test.com", fundId2)
             };
 
             _investorRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(investors);
@@ -55,26 +58,29 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task CreateAsync_ShouldReturnMappedDto_WhenFundExists()
         {
-            var createDto = new InvestorCreateDto("Eric Test", "eric@example.com", 1);
-            var entity = new Investor { InvestorId = 1, FullName = "Eric Test", Email = "eric@example.com", FundId = 1 };
-            var readDto = new InvestorReadDto(1, "Eric Test", "eric@example.com", 1);
+            var investorId = Guid.NewGuid();
+            var fundId = Guid.NewGuid();
+            var createDto = new InvestorCreateDto("Eric Test", "eric@example.com", fundId);
+            var entity = new Investor { InvestorId = investorId, FullName = "Eric Test", Email = "eric@example.com", FundId = fundId };
+            var readDto = new InvestorReadDto(investorId, "Eric Test", "eric@example.com", fundId);
 
-            _fundRepo.Setup(r => r.ExistsAsync(1)).ReturnsAsync(true);
+            _fundRepo.Setup(r => r.ExistsAsync(fundId)).ReturnsAsync(true);
             _mapper.Setup(m => m.Map<Investor>(createDto)).Returns(entity);
             _mapper.Setup(m => m.Map<InvestorReadDto>(entity)).Returns(readDto);
 
             var result = await _service.CreateAsync(createDto);
 
             _investorRepo.Verify(r => r.AddAsync(entity), Times.Once);
-            _fundRepo.Verify(r => r.ExistsAsync(1), Times.Once);
+            _fundRepo.Verify(r => r.ExistsAsync(fundId), Times.Once);
             Assert.Equal(readDto, result);            
         }
 
         [Fact]
         public async Task CreateAsync_ShouldThrow_WhenFundDoesNotExist()
         {
-            _fundRepo.Setup(r => r.ExistsAsync(1)).ReturnsAsync(false);
-            var dto = new InvestorCreateDto("John", "john@x.com", 1);
+            var fundId = Guid.NewGuid();
+            _fundRepo.Setup(r => r.ExistsAsync(fundId)).ReturnsAsync(false);
+            var dto = new InvestorCreateDto("John", "john@x.com", fundId);
 
             await Assert.ThrowsAsync<ArgumentException>(() => _service.CreateAsync(dto));
         }
@@ -82,11 +88,12 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task DeleteAsync_ShouldReturnTrue_WhenInvestorExists()
         {
-            var investor = new Investor { InvestorId = 1, FullName = "John", Email = "john@x.com", FundId = 2 };
+            var investorId = Guid.NewGuid();
+            var investor = new Investor { InvestorId = investorId, FullName = "John", Email = "john@x.com", FundId = Guid.NewGuid() };
 
-            _investorRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(investor);
+            _investorRepo.Setup(r => r.GetByIdAsync(investorId)).ReturnsAsync(investor);
 
-            var result = await _service.DeleteAsync(1);
+            var result = await _service.DeleteAsync(investorId);
 
             Assert.True(result);
             _investorRepo.Verify(r => r.DeleteAsync(investor), Times.Once);
@@ -96,9 +103,10 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task DeleteAsync_ShouldReturnFalse_WhenNotFound()
         {
-            _investorRepo.Setup(r => r.GetByIdAsync(5)).ReturnsAsync((Investor?)null);
+            var investorId = Guid.NewGuid();
+            _investorRepo.Setup(r => r.GetByIdAsync(investorId)).ReturnsAsync((Investor?)null);
 
-            var result = await _service.DeleteAsync(5);
+            var result = await _service.DeleteAsync(investorId);
 
             Assert.False(result);
         }
@@ -106,13 +114,13 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task UpdateAsync_ShouldReturnTrue_WhenSuccess()
         {
-            var dto = new InvestorUpdateDto("Jane", "jane@x.com", 2);
-            var entity = new Investor { InvestorId = 1 };
+            var dto = new InvestorUpdateDto("Jane", "jane@x.com", Guid.NewGuid());
+            var entity = new Investor { InvestorId = Guid.NewGuid() };
 
             _fundRepo.Setup(r => r.ExistsAsync(dto.FundId)).ReturnsAsync(true);
-            _investorRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(entity);
+            _investorRepo.Setup(r => r.GetByIdAsync(entity.InvestorId)).ReturnsAsync(entity);
 
-            var result = await _service.UpdateAsync(1, dto);
+            var result = await _service.UpdateAsync(entity.InvestorId, dto);
 
             Assert.True(result);
             _investorRepo.Verify(r => r.UpdateAsync(entity), Times.Once);

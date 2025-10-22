@@ -5,7 +5,6 @@ using FundAdmin.Application.Interfaces.Repositories;
 using FundAdmin.Domain.Entities;
 using FundAdmin.Domain.Enums;
 
-
 namespace FundAdmin.Application.Tests.Services
 {
     public class ReportingServiceTests
@@ -29,22 +28,26 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task GetFundSummariesAsync_ShouldReturnSummaries_ForExistingFunds()
         {
+            // Arrange
+            var fundId1 = Guid.NewGuid();
+            var fundId2 = Guid.NewGuid();
+
             var funds = new List<Fund>
             {
-                new() { FundId = 1, FundName = "Alpha", CurrencyCode = "USD" },
-                new() { FundId = 2, FundName = "Beta", CurrencyCode = "EUR" }
+                new() { FundId = fundId1, FundName = "Alpha", CurrencyCode = "USD" },
+                new() { FundId = fundId2, FundName = "Beta", CurrencyCode = "EUR" }
             };
 
             _fundRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(funds);
 
-            _txRepo.Setup(r => r.GetTotalByFundAsync(1, TransactionType.Subscription)).ReturnsAsync(1000);
-            _txRepo.Setup(r => r.GetTotalByFundAsync(1, TransactionType.Redemption)).ReturnsAsync(400);
-            _txRepo.Setup(r => r.GetTotalByFundAsync(2, TransactionType.Subscription)).ReturnsAsync(500);
-            _txRepo.Setup(r => r.GetTotalByFundAsync(2, TransactionType.Redemption)).ReturnsAsync(100);
+            _txRepo.Setup(r => r.GetTotalByFundAsync(fundId1, TransactionType.Subscription)).ReturnsAsync(1000);
+            _txRepo.Setup(r => r.GetTotalByFundAsync(fundId1, TransactionType.Redemption)).ReturnsAsync(400);
+            _txRepo.Setup(r => r.GetTotalByFundAsync(fundId2, TransactionType.Subscription)).ReturnsAsync(500);
+            _txRepo.Setup(r => r.GetTotalByFundAsync(fundId2, TransactionType.Redemption)).ReturnsAsync(100);
 
-            _investorRepo.Setup(r => r.GetByFundAsync(1)).ReturnsAsync(new List<Investor> { new(), new() });
-            _investorRepo.Setup(r => r.GetByFundAsync(2)).ReturnsAsync(new List<Investor> { new() });
-
+            _investorRepo.Setup(r => r.GetByFundAsync(fundId1)).ReturnsAsync(new List<Investor> { new(), new() });
+            _investorRepo.Setup(r => r.GetByFundAsync(fundId2)).ReturnsAsync(new List<Investor> { new() });
+            
             var result = (await _service.GetFundSummariesAsync()).ToList();
 
             Assert.Equal(2, result.Count);
@@ -61,8 +64,8 @@ namespace FundAdmin.Application.Tests.Services
             Assert.Equal(1, beta.InvestorCount);
 
             _fundRepo.Verify(r => r.GetAllAsync(), Times.Once);
-            _txRepo.Verify(r => r.GetTotalByFundAsync(It.IsAny<int>(), It.IsAny<TransactionType>()), Times.Exactly(4));
-            _investorRepo.Verify(r => r.GetByFundAsync(It.IsAny<int>()), Times.Exactly(2));
+            _txRepo.Verify(r => r.GetTotalByFundAsync(It.IsAny<Guid>(), It.IsAny<TransactionType>()), Times.Exactly(4));
+            _investorRepo.Verify(r => r.GetByFundAsync(It.IsAny<Guid>()), Times.Exactly(2));
         }
 
         [Fact]
@@ -73,9 +76,10 @@ namespace FundAdmin.Application.Tests.Services
             var result = await _service.GetFundSummariesAsync();
 
             Assert.Empty(result);
-            _txRepo.Verify(r => r.GetTotalByFundAsync(It.IsAny<int>(), It.IsAny<TransactionType>()), Times.Never);
-            _investorRepo.Verify(r => r.GetByFundAsync(It.IsAny<int>()), Times.Never);
+            _txRepo.Verify(r => r.GetTotalByFundAsync(It.IsAny<Guid>(), It.IsAny<TransactionType>()), Times.Never);
+            _investorRepo.Verify(r => r.GetByFundAsync(It.IsAny<Guid>()), Times.Never);
         }
+
     }
 
 }

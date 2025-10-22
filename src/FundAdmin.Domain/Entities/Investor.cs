@@ -6,7 +6,7 @@ namespace FundAdmin.Domain.Entities;
 public class Investor
 {
     [Key]
-    public int InvestorId { get; set; }
+    public Guid InvestorId { get; set; }
 
     [Required, MaxLength(200)]
     public string FullName { get; set; } = string.Empty;
@@ -15,7 +15,7 @@ public class Investor
     public string Email { get; set; } = string.Empty;
 
     [ForeignKey(nameof(Fund))]
-    public int FundId { get; set; }
+    public Guid FundId { get; set; }
 
     public Fund? Fund { get; set; }
 

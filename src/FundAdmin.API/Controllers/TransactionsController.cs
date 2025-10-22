@@ -35,8 +35,8 @@ public class TransactionsController : ControllerBase
     /// </summary>
     /// <param name="investorId">Investor Id</param>
     /// <returns>List of transactions</returns>
-    [HttpGet("investor/{investorId:int}")]
-    public async Task<ActionResult<IEnumerable<TransactionReadDto>>> GetByInvestor(int investorId)
+    [HttpGet("investor/{investorId:Guid}")]
+    public async Task<ActionResult<IEnumerable<TransactionReadDto>>> GetByInvestor(Guid investorId)
     {
         return Ok(await _transactionService.GetByInvestorAsync(investorId));
     }
@@ -46,8 +46,8 @@ public class TransactionsController : ControllerBase
     /// </summary>
     /// <param name="fundId">Fund Id</param>
     /// <returns>List of transactions</returns>
-    [HttpGet("fund/{fundId:int}/summary")]
-    public async Task<ActionResult<IEnumerable<TransactionReadDto>>> GetFundTransactionSummary(int fundId)
+    [HttpGet("fund/{fundId:Guid}/summary")]
+    public async Task<ActionResult<IEnumerable<TransactionReadDto>>> GetFundTransactionSummary(Guid fundId)
     {
         var summary = await _transactionService.GetFundSummaryAsync(fundId);
 
