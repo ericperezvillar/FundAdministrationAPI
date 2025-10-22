@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\FundAdmin.Infrastructure\FundAdmin.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\FundAdmin.Infrastructure\FundAdmin.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
