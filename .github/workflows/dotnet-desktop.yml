@@ -36,148 +36,80 @@
 # For a complete CI/CD sample to get started with GitHub Action workflows for Desktop Applications,
 # refer to https://github.com/microsoft/github-actions-for-desktop-apps
 
-name: .NET Core Desktop
+name: Build .NET Fund Application API
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ main, master ]
 
 jobs:
-
   build:
-
-    strategy:
-      matrix:
-        configuration: [Debug, Release]
-
     runs-on: windows-latest
 
     env:
-      # Update these values if your filenames/paths differ
-      Solution_Name: FundAdminAPI.sln                        # Replace with your solution name if different
-      Test_Project_Path: your-test-project-path                       # Replace with the path to your test project (or leave to run all tests)
-      Wap_Project_Directory: FundAdministrationAPI                    # Relative path to WAP project directory (do NOT include the repo twice)
-      Wap_Project_Path: FundAdministrationAPI.Package                  # The WAP .wapproj path (relative to repo root), e.g. MyWpf.App.Package\MyWpfApp.Package.wapproj
+      Configuration: Release
+      Base64_Encoded_Pfx: ${{ secrets.Base64_Encoded_Pfx }}
+      Pfx_Password: ${{ secrets.Pfx_Password }}
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      # Checkout repo
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install .NET Core
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
+      # Setup .NET SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
 
-    - name: Setup MSBuild.exe
-      uses: microsoft/setup-msbuild@v2
+      # Restore dependencies
+      - name: Restore dependencies
+        run: dotnet restore
 
-    - name: Execute unit tests
-      shell: pwsh
-      run: |
-        if (-not [string]::IsNullOrEmpty("$env:Test_Project_Path") -and "$env:Test_Project_Path" -ne "your-test-project-path") {
-          Write-Host "Running dotnet test for: $env:Test_Project_Path"
-          dotnet test $env:Test_Project_Path
-        } else {
-          Write-Host "Running dotnet test for solution (no Test_Project_Path configured)"
-          dotnet test
-        }
+      # Build project
+      - name: Build solution
+        run: dotnet build --no-restore --configuration $Env:Configuration
 
-    - name: Restore the application
-      shell: pwsh
-      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=$env:Configuration
-      env:
-        Configuration: ${{ matrix.configuration }}
+      # Run tests
+      - name: Run tests
+        run: dotnet test --no-build --verbosity normal
 
-    - name: Decode the pfx (robust)
-      shell: pwsh
-      env:
-        Base64_Encoded_Pfx: ${{ secrets.Base64_Encoded_Pfx }}
-      run: |
-        if ([string]::IsNullOrEmpty($Env:Base64_Encoded_Pfx)) {
-          Write-Error "Secret Base64_Encoded_Pfx is empty or not set"
-          exit 1
-        }
+      # Optional – Decode certificate if secrets are set
+      - name: Decode and import PFX certificate (optional)
+        if: env.Base64_Encoded_Pfx != '' && env.Pfx_Password != ''
+        shell: pwsh
+        run: |
+          Write-Host "PFX secret detected — decoding certificate..."
+          [IO.File]::WriteAllBytes("cert.pfx", [Convert]::FromBase64String($Env:Base64_Encoded_Pfx))
+          Write-Host "Certificate decoded successfully."
 
-        # Normalize workspace and wap values
-        $gw = $env:GITHUB_WORKSPACE.TrimEnd('\')
-        $wap = $env:Wap_Project_Directory
-
-        if ([string]::IsNullOrEmpty($wap) -or $wap -eq '.') {
-          $targetDir = $gw
-        } else {
-          # If $wap already contains the full workspace path, use as-is; otherwise join workspace + wap
-          if ($wap -like "$gw*") {
-            $targetDir = $wap
-          } else {
-            $targetDir = Join-Path -Path $gw -ChildPath $wap
+      # Optional – Sign the binaries
+      - name: Sign binaries (optional)
+        if: env.Base64_Encoded_Pfx != '' && env.Pfx_Password != ''
+        shell: pwsh
+        run: |
+          Write-Host "Signing assemblies..."
+          $exeFiles = Get-ChildItem -Path "." -Recurse -Include *.exe, *.dll
+          foreach ($file in $exeFiles) {
+              & "C:\Program Files (x86)\Windows Kits\10\bin\x64\signtool.exe" sign `
+                /f cert.pfx `
+                /p $Env:Pfx_Password `
+                /tr http://timestamp.digicert.com `
+                /td sha256 `
+                /fd sha256 `
+                "$($file.FullName)"
           }
-        }
+          Write-Host "Signing completed."
 
-        Write-Host "Computed paths:"
-        Write-Host "  GITHUB_WORKSPACE = $gw"
-        Write-Host "  Wap_Project_Directory (raw) = '$wap'"
-        Write-Host "  targetDir = $targetDir"
+      # Publish app (optional)
+      - name: Publish app
+        run: dotnet publish --configuration $Env:Configuration --output ./publish
 
-        # Ensure the directory exists
-        if (-not (Test-Path -Path $targetDir)) {
-          Write-Host "Creating directory: $targetDir"
-          New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-        }
-
-        $certificatePath = Join-Path -Path $targetDir -ChildPath "GitHubActionsWorkflow.pfx"
-
-        try {
-          $pfx_cert_byte = [System.Convert]::FromBase64String($Env:Base64_Encoded_Pfx)
-          [IO.File]::WriteAllBytes($certificatePath, $pfx_cert_byte)
-          Write-Host "Wrote pfx to $certificatePath"
-        } catch {
-          Write-Error "Failed to decode/write pfx: $_"
-          exit 1
-        }
-
-        # Persist absolute certificate path and WAP absolute dir for later steps
-        Add-Content -Path $env:GITHUB_ENV -Value "CERTIFICATE_PATH=$certificatePath"
-        Add-Content -Path $env:GITHUB_ENV -Value "WAP_ABS_PATH=$targetDir"
-
-    - name: Create the app package
-      shell: pwsh
-      env:
-        Appx_Bundle: Always
-        Appx_Bundle_Platforms: x86|x64
-        Appx_Package_Build_Mode: StoreUpload
-        Configuration: ${{ matrix.configuration }}
-        Pfx_Key: ${{ secrets.Pfx_Key }}
-      run: |
-        if (-not $env:CERTIFICATE_PATH) {
-          Write-Error "CERTIFICATE_PATH is not set. Did the decode step fail?"
-          exit 1
-        }
-        if (-not (Test-Path $env:CERTIFICATE_PATH)) {
-          Write-Error "Certificate file not found at $env:CERTIFICATE_PATH"
-          exit 1
-        }
-
-        Write-Host "Using certificate: $env:CERTIFICATE_PATH"
-        Write-Host "Building WAP project: $env:Wap_Project_Path"
-
-        msbuild $env:Wap_Project_Path /p:Configuration=$env:Configuration /p:UapAppxPackageBuildMode=$env:Appx_Package_Build_Mode /p:AppxBundle=$env:Appx_Bundle /p:PackageCertificateKeyFile="$env:CERTIFICATE_PATH" /p:PackageCertificatePassword="$env:Pfx_Key"
-
-    - name: Remove the pfx
-      shell: pwsh
-      run: |
-        if ($env:CERTIFICATE_PATH -and (Test-Path $env:CERTIFICATE_PATH)) {
-          Remove-Item -Path $env:CERTIFICATE_PATH -Force -ErrorAction SilentlyContinue
-          Write-Host "Removed certificate: $env:CERTIFICATE_PATH"
-        } else {
-          Write-Host "No certificate found to remove at: $env:CERTIFICATE_PATH"
-        }
-
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: MSIX Package
-        path: ${{ env.WAP_ABS_PATH }}\AppPackages
+      # Upload build artifacts
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dotnet-desktop-build
+          path: ./publish
