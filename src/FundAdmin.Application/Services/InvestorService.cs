@@ -38,7 +38,7 @@ public class InvestorService : IInvestorService
         return _mapper.Map<InvestorReadDto>(investor);
     }
 
-    public async Task<bool> DeleteAsync(int id)
+    public async Task<bool> DeleteAsync(Guid id)
     {
         var entity = await _investorRepo.GetByIdAsync(id);
         if (entity is null) return false;
@@ -52,13 +52,13 @@ public class InvestorService : IInvestorService
         return _mapper.Map<IEnumerable<InvestorReadDto>>(items);
     }
 
-    public async Task<InvestorReadDto?> GetByIdAsync(int id)
+    public async Task<InvestorReadDto?> GetByIdAsync(Guid id)
     {
         var item = await _investorRepo.GetByIdAsync(id);
         return item is null ? null : _mapper.Map<InvestorReadDto>(item);
     }
 
-    public async Task<bool> UpdateAsync(int id, InvestorUpdateDto dto)
+    public async Task<bool> UpdateAsync(Guid id, InvestorUpdateDto dto)
     {
         var fundExists = await _fundRepo.ExistsAsync(dto.FundId);
         if (!fundExists)

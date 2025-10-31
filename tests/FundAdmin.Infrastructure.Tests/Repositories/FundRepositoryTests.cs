@@ -1,12 +1,7 @@
-﻿using Xunit;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using FundAdmin.Infrastructure.Repositories.Implementations;
 using FundAdmin.Domain.Entities;
 using FundAdmin.Infrastructure.Data;
-using System;
-using System.Threading.Tasks;
-using System.Linq;
-
 
 namespace FundAdmin.Infrastructure.Tests.Repositories
 {   
@@ -65,12 +60,13 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         [Fact]
         public async Task ExistsAsync_ShouldReturnTrue_WhenFundExists()
         {
+            var fund = new Fund { FundName = "Exists", CurrencyCode = "EUR" };
             using var context = CreateContext();
-            context.Funds.Add(new Fund { FundName = "Exists", CurrencyCode = "GBP" });
+            context.Funds.Add(fund);
             await context.SaveChangesAsync();
 
             var repo = new FundRepository(context);
-            var exists = await repo.ExistsAsync(1);
+            var exists = await repo.ExistsAsync(fund.FundId);
 
             Assert.True(exists);
         }

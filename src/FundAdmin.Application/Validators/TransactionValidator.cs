@@ -9,7 +9,7 @@ public class TransactionValidator : AbstractValidator<TransactionCreateDto>
     {
         RuleFor(x => x.Amount).GreaterThan(0).WithMessage("Amount must be greater than 0.");
 
-        RuleFor(x => x.InvestorId).GreaterThan(0);
+        RuleFor(x => x.InvestorId).NotEmpty();
 
         RuleFor(x => x.TransactionDate).LessThanOrEqualTo(DateTime.UtcNow.AddMinutes(1));
     }

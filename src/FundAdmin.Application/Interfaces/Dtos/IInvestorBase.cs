@@ -10,6 +10,6 @@ namespace FundAdmin.Application.Interfaces.Dtos
     {
         string FullName { get; }
         string Email { get; }
-        int FundId { get; }
+        Guid FundId { get; }
     }
 }

@@ -23,13 +23,13 @@ public class InvestorRepository : IInvestorRepository
         await _db.SaveChangesAsync();
     }
 
-    public async Task<bool> ExistsAsync(int id) => await _db.Investors.AnyAsync(x => x.InvestorId == id);
+    public async Task<bool> ExistsAsync(Guid id) => await _db.Investors.AnyAsync(x => x.InvestorId == id);
 
     public async Task<IEnumerable<Investor>> GetAllAsync() => await _db.Investors.AsNoTracking().ToListAsync();
 
-    public async Task<Investor?> GetByIdAsync(int id) => await _db.Investors.AsNoTracking().FirstOrDefaultAsync(x => x.InvestorId == id);
+    public async Task<Investor?> GetByIdAsync(Guid id) => await _db.Investors.AsNoTracking().FirstOrDefaultAsync(x => x.InvestorId == id);
 
-    public async Task<IEnumerable<Investor>> GetByFundAsync(int fundId) => await _db.Investors.AsNoTracking().Where(i => i.FundId == fundId).ToListAsync();
+    public async Task<IEnumerable<Investor>> GetByFundAsync(Guid fundId) => await _db.Investors.AsNoTracking().Where(i => i.FundId == fundId).ToListAsync();
 
     public async Task UpdateAsync(Investor entity)
     {

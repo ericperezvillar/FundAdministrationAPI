@@ -2,6 +2,6 @@ using FundAdmin.Application.Interfaces.Dtos;
 
 namespace FundAdmin.Application.DTOs;
 
-public record InvestorCreateDto(string FullName, string Email, int FundId) : IInvestorBase;
-public record InvestorUpdateDto(string FullName, string Email, int FundId) : IInvestorBase;
-public record InvestorReadDto(int InvestorId, string FullName, string Email, int FundId);
+public record InvestorCreateDto(string FullName, string Email, Guid FundId) : IInvestorBase;
+public record InvestorUpdateDto(string FullName, string Email, Guid FundId) : IInvestorBase;
+public record InvestorReadDto(Guid InvestorId, string FullName, string Email, Guid FundId);

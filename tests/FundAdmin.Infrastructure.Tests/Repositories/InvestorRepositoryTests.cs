@@ -20,7 +20,7 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         {
             using var context = CreateContext();
             var repo = new InvestorRepository(context);
-            var investor = new Investor { FullName = "John Doe", Email = "john@test.com", FundId = 1 };
+            var investor = new Investor { FullName = "John Doe", Email = "john@test.com", FundId = Guid.NewGuid() };
 
             await repo.AddAsync(investor);
 
@@ -31,7 +31,7 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         public async Task GetByIdAsync_ShouldReturnInvestor()
         {
             using var context = CreateContext();
-            var investor = new Investor { FullName = "Jane", Email = "jane@test.com", FundId = 1 };
+            var investor = new Investor { FullName = "Jane", Email = "jane@test.com", FundId = Guid.NewGuid() };
             context.Investors.Add(investor);
             await context.SaveChangesAsync();
 
@@ -47,8 +47,8 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         {
             using var context = CreateContext();
             context.Investors.AddRange(
-                new Investor { FullName = "I1", Email = "a@a.com", FundId = 1 },
-                new Investor { FullName = "I2", Email = "b@b.com", FundId = 2 });
+                new Investor { FullName = "I1", Email = "a@a.com", FundId = Guid.NewGuid() },
+                new Investor { FullName = "I2", Email = "b@b.com", FundId = Guid.NewGuid() });
             await context.SaveChangesAsync();
 
             var repo = new InvestorRepository(context);
@@ -61,11 +61,12 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         public async Task ExistsAsync_ShouldReturnTrue_WhenInvestorExists()
         {
             using var context = CreateContext();
-            context.Investors.Add(new Investor { FullName = "Exist", Email = "exist@test.com", FundId = 1 });
+            var investor = new Investor { FullName = "Exist", Email = "exist@test.com", FundId = Guid.NewGuid() };
+            context.Investors.Add(investor);
             await context.SaveChangesAsync();
 
             var repo = new InvestorRepository(context);
-            var exists = await repo.ExistsAsync(1);
+            var exists = await repo.ExistsAsync(investor.InvestorId);
 
             Assert.True(exists);
         }
@@ -73,14 +74,15 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         [Fact]
         public async Task GetByFundAsync_ShouldReturnInvestorsByFund()
         {
+            var fundId = Guid.NewGuid();
             using var context = CreateContext();
             context.Investors.AddRange(
-                new Investor { FullName = "I1", FundId = 1 },
-                new Investor { FullName = "I2", FundId = 2 });
+                new Investor { FullName = "I1", FundId = fundId },
+                new Investor { FullName = "I2", FundId = Guid.NewGuid() });
             await context.SaveChangesAsync();
 
             var repo = new InvestorRepository(context);
-            var result = await repo.GetByFundAsync(1);
+            var result = await repo.GetByFundAsync(fundId);
 
             Assert.Single(result);
             Assert.Equal("I1", result.First().FullName);
@@ -90,7 +92,7 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         public async Task UpdateAsync_ShouldModifyInvestor()
         {
             using var context = CreateContext();
-            var investor = new Investor { FullName = "Old", FundId = 1 };
+            var investor = new Investor { FullName = "Old", FundId = Guid.NewGuid() };
             context.Investors.Add(investor);
             await context.SaveChangesAsync();
 
@@ -106,7 +108,7 @@ namespace FundAdmin.Infrastructure.Tests.Repositories
         public async Task DeleteAsync_ShouldRemoveInvestor()
         {
             using var context = CreateContext();
-            var investor = new Investor { FullName = "ToDelete", FundId = 1 };
+            var investor = new Investor { FullName = "ToDelete", FundId = Guid.NewGuid() };
             context.Investors.Add(investor);
             await context.SaveChangesAsync();
 

@@ -22,16 +22,18 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task GetAllAsync_ShouldReturnMappedDtos()
         {
+            var fundId1 = Guid.NewGuid();
+            var fundId2 = Guid.NewGuid();
             var funds = new List<Fund>
             {
-                new() { FundId = 1, FundName = "Alpha", CurrencyCode = "USD" },
-                new() { FundId = 2, FundName = "Beta", CurrencyCode = "EUR" }
+                new() { FundId = fundId1, FundName = "Alpha", CurrencyCode = "USD" },
+                new() { FundId = fundId2, FundName = "Beta", CurrencyCode = "EUR" }
             };
             
             var mapped = new List<FundReadDto>
             {
-                new(1, "Alpha", "USD", DateTime.UtcNow),
-                new(2, "Beta", "EUR", DateTime.UtcNow)
+                new(fundId1, "Alpha", "USD", DateTime.UtcNow),
+                new(fundId2, "Beta", "EUR", DateTime.UtcNow)
             };
 
             _fundRepo.Setup(r => r.GetAllAsync()).ReturnsAsync(funds);
@@ -47,8 +49,8 @@ namespace FundAdmin.Application.Tests.Services
         public async Task CreateAsync_ShouldReturnMappedDto()
         {
             var dto = new FundCreateDto("Alpha", "USD", DateTime.UtcNow);
-            var entity = new Fund { FundName = "Alpha", CurrencyCode = "USD" };
-            var read = new FundReadDto(1, "Alpha", "USD", DateTime.UtcNow);
+            var entity = new Fund { FundId = Guid.NewGuid(), FundName = "Alpha", CurrencyCode = "USD" };
+            var read = new FundReadDto(entity.FundId, "Alpha", "USD", DateTime.UtcNow);
 
             _mapper.Setup(m => m.Map<Fund>(dto)).Returns(entity);
             _mapper.Setup(m => m.Map<FundReadDto>(entity)).Returns(read);
@@ -62,10 +64,11 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task UpdateAsync_ShouldReturnFalse_WhenNotFound()
         {
-            _fundRepo.Setup(r => r.GetByIdAsync(99)).ReturnsAsync((Fund?)null);
+            var fundId = Guid.NewGuid();
+            _fundRepo.Setup(r => r.GetByIdAsync(fundId)).ReturnsAsync((Fund?)null);
             var dto = new FundUpdateDto("New", "EUR", DateTime.UtcNow);
 
-            var result = await _service.UpdateAsync(99, dto);
+            var result = await _service.UpdateAsync(fundId, dto);
 
             Assert.False(result);
         }
@@ -73,10 +76,11 @@ namespace FundAdmin.Application.Tests.Services
         [Fact]
         public async Task DeleteAsync_ShouldReturnTrue_WhenEntityFound()
         {
-            var fund = new Fund { FundId = 1 };
-            _fundRepo.Setup(r => r.GetByIdAsync(1)).ReturnsAsync(fund);
+            var fundId = Guid.NewGuid();
+            var fund = new Fund { FundId = fundId };
+            _fundRepo.Setup(r => r.GetByIdAsync(fundId)).ReturnsAsync(fund);
 
-            var result = await _service.DeleteAsync(1);
+            var result = await _service.DeleteAsync(fundId);
 
             Assert.True(result);
             _fundRepo.Verify(r => r.DeleteAsync(fund), Times.Once);
