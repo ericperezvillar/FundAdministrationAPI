@@ -56,7 +56,7 @@ jobs:
 
     env:
       # Update these values if your filenames/paths differ
-      Solution_Name: FundAdministrationAPI.sln                        # Replace with your solution name if different
+      Solution_Name: FundAdminAPI.sln                        # Replace with your solution name if different
       Test_Project_Path: your-test-project-path                       # Replace with the path to your test project (or leave to run all tests)
       Wap_Project_Directory: FundAdministrationAPI                    # Relative path to WAP project directory (do NOT include the repo twice)
       Wap_Project_Path: FundAdministrationAPI.Package                  # The WAP .wapproj path (relative to repo root), e.g. MyWpf.App.Package\MyWpfApp.Package.wapproj
